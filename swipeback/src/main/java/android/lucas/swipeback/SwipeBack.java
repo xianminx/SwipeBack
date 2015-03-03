@@ -1,31 +1,83 @@
 package android.lucas.swipeback;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
-import android.util.Log;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
-
-import java.lang.reflect.Method;
+import android.view.View;
+import android.view.ViewConfiguration;
 
 /**
  * Created by lucas on 2/26/15.
  */
 public class SwipeBack {
-
     private static final String TAG = SwipeBack.class.getName();
+    private boolean mIsTrackingSwipeBackGesture;
+    private float mLastX;
+    private float mTouchSlop;
+    private float mScaledEdgeSlop;
+    private float mScreenWidth;
+    private View mDecorView;
+    private Activity mActivity;
 
-    public static boolean onTouchEvent(final Activity activity, MotionEvent event) {
-        GestureDetector.OnGestureListener onGestureListener = new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                Log.d(TAG, String.format("onScroll(e1=%s, e2=%s, distanceX=%s, y=%s)", e1, e2, distanceX, distanceY));
-                activity.getWindow().getDecorView().setX(e2.getX());
-                //decorView.invalidate();
-                return super.onScroll(e1, e2, distanceX, distanceY);
+    public SwipeBack(Activity activity) {
+        mActivity = activity;
+        mTouchSlop = ViewConfiguration.get(mActivity).getScaledTouchSlop();
+        mScaledEdgeSlop = ViewConfiguration.get(mActivity).getScaledEdgeSlop();
+        mScreenWidth = mActivity.getWindowManager().getDefaultDisplay().getWidth();
+        mDecorView = mActivity.getWindow().getDecorView();
+        mIsTrackingSwipeBackGesture = false;
+        mLastX = 0.0f;
+    }
+
+    /**
+     * Call this method in Activity's onTouchEvent method.
+     *
+     * @param ev
+     * @return true if consumed the event, false if not.
+     */
+    public final boolean onTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN && ev.getX() <= mScaledEdgeSlop) {
+            mIsTrackingSwipeBackGesture = true;
+            return true;
+        }
+
+        if (mIsTrackingSwipeBackGesture) {
+            if (ev.getAction() == MotionEvent.ACTION_MOVE && Math.abs(ev.getX() - mLastX) > mTouchSlop) {
+                mLastX = ev.getX();
+                mDecorView.setX(ev.getX());
+            } else if (ev.getAction() == MotionEvent.ACTION_UP) {
+                mIsTrackingSwipeBackGesture = false;
+                if (ev.getX() < 200.0f) {
+                    ObjectAnimator anim = ObjectAnimator.ofFloat(mDecorView, "translationX", mDecorView.getX(), 0);
+                    anim.start();
+                } else {
+                    ObjectAnimator anim = ObjectAnimator.ofFloat(mDecorView, "translationX", mDecorView.getX(), mScreenWidth);
+                    anim.addListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mActivity.finish();
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+
+                        }
+                    });
+                    anim.start();
+                }
             }
-        };
-        GestureDetector gestureDetector = new GestureDetector(activity, onGestureListener);
-        gestureDetector.onTouchEvent(event);
+            return true;
+        }
         return false;
     }
 }
