@@ -2,6 +2,8 @@
 
 Navigate back to the previous Activity by Swipe Gesture from the left edge of the screen.
 
+[ ![Download](https://api.bintray.com/packages/xianminx/maven/SwipeBack/images/download.svg) ](https://bintray.com/xianminx/maven/SwipeBack/_latestVersion)
+
 ## Demo
 
 
