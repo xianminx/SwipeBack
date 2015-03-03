@@ -7,6 +7,9 @@ Navigate back to the previous Activity by Swipe Gesture from the left edge of th
 ## Demo
 
 <iframe width="420" height="315" src="https://www.youtube.com/embed/QoQxScMfRUk" frameborder="0" allowfullscreen></iframe>
+[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/QoQxScMfRUk/0.jpg)](http://www.youtube.com/watch?v=QoQxScMfRUk)
+
+
 
 ## Usage
 
